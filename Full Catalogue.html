@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fieldnote Goods — Shop</title>
+<meta name="description" content="Everyday-carry goods: audio, bags, watches and desk gear. Browse, compare and shop.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#15171C',
+          paper: '#FFFFFF',
+          hairline: '#E4E4E1',
+          cobalt: { DEFAULT:'#2454FF', dark:'#1B3FCC' },
+          mustard: '#E8A33D',
+          fog: '#F5F5F3',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"','sans-serif'],
+          body: ['"Inter"','sans-serif'],
+          mono: ['"IBM Plex Mono"','monospace'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  :root{ --cobalt:#2454FF; --mustard:#E8A33D; --ink:#15171C; --hairline:#E4E4E1; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Inter', sans-serif; color:var(--ink); background:#fff; }
+  h1,h2,h3,.font-display{ font-family:'Space Grotesk', sans-serif; }
+  .font-mono{ font-family:'IBM Plex Mono', monospace; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--cobalt); outline-offset:2px; border-radius:3px;
+  }
+  ::selection{ background:var(--cobalt); color:#fff; }
+
+  /* ---- Signature: price tag stamp ---- */
+  .price-tag{
+    position:absolute; top:10px; left:0;
+    background:var(--ink); color:#fff;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500;
+    padding:4px 10px 4px 12px; letter-spacing:0.02em;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6px 50%);
+  }
+  .price-tag.sale{ background:var(--mustard); color:#15171C; }
+
+  /* Ticket / torn-edge motif reused on modal + cart drawer */
+  .ticket-edge{
+    background-image: radial-gradient(circle at 6px 6px, transparent 6px, #fff 6.5px);
+    background-size: 16px 13px; background-position: -4px top; background-repeat: repeat-x;
+  }
+
+  /* Product card image swap */
+  .card-media{ position:relative; overflow:hidden; background:#F5F5F3; }
+  .card-media img.secondary{ position:absolute; inset:0; opacity:0; transform:scale(1.04); transition:opacity .45s ease, transform .5s ease; }
+  .product-card:hover .card-media img.secondary{ opacity:1; transform:scale(1.08); }
+  .card-media img.primary{ transition:opacity .45s ease; }
+  .product-card:hover .card-media img.primary{ opacity:0; }
+
+  /* Card lift */
+  .product-card{ transition:transform .25s ease, box-shadow .25s ease; }
+  .product-card:hover{ transform:translateY(-4px); box-shadow:0 14px 30px -12px rgba(21,23,28,0.18); }
+
+  /* Skeleton */
+  .skel{ background:linear-gradient(90deg,#eee 25%,#f5f5f5 37%,#eee 63%); background-size:400% 100%; animation:skelShine 1.3s ease infinite; }
+  @keyframes skelShine{ 0%{background-position:100% 50%} 100%{background-position:0 50%} }
+
+  /* Modal */
+  .modal-backdrop{ background:rgba(21,23,28,0.55); backdrop-filter:blur(3px); }
+  .modal-panel{ animation:modalIn .28s cubic-bezier(.2,.8,.3,1); }
+  @keyframes modalIn{ from{ opacity:0; transform:translateY(14px) scale(.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
+
+  /* Cart drawer */
+  .drawer{ transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+  .drawer.closed{ transform:translateX(100%); }
+
+  /* Toast */
+  .toast{ animation:toastIn .3s ease, toastOut .3s ease 2.4s forwards; }
+  @keyframes toastIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes toastOut{ to{opacity:0; transform:translateY(-6px);} }
+
+  /* Heart pulse on toggle */
+  @keyframes heartPop{ 0%{transform:scale(1);} 40%{transform:scale(1.35);} 100%{transform:scale(1);} }
+  .heart-pop{ animation:heartPop .35s ease; }
+
+  /* Reveal */
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  .star-row{ letter-spacing:1px; color:var(--mustard); }
+
+  input[type="checkbox"].cmp{ accent-color:var(--cobalt); width:16px; height:16px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+  }
+
+  .line-clamp-1{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+  .line-clamp-3{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+</style>
+</head>
+<body class="bg-white text-ink antialiased">
+
+<a href="#grid-top" class="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:bg-ink focus:text-white focus:px-4 focus:py-2 focus:top-2 focus:left-2 focus:rounded">Skip to product grid</a>
+
+<!-- ============ HEADER ============ -->
+<header class="border-b border-hairline sticky top-0 z-40 bg-white/95 backdrop-blur">
+  <div class="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-4">
+    <a href="#" class="font-display font-700 text-lg md:text-xl tracking-tight shrink-0">Fieldnote <span class="text-cobalt">Goods</span></a>
+
+    <div class="hidden md:flex items-center flex-1 max-w-md relative">
+      <svg class="absolute left-3 text-ink/35" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="search-input" type="text" placeholder="Search products…" class="w-full bg-fog rounded-full pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-cobalt/40" aria-label="Search products">
+    </div>
+
+    <div class="flex items-center gap-2 md:gap-3">
+      <button id="wishlist-btn" class="relative w-10 h-10 rounded-full hover:bg-fog flex items-center justify-center transition" aria-label="View wishlist">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.4 2.4 5 6 5c2 0 3.4 1 6 3.5C14.6 6 16 5 18 5c3.6 0 5.5 3.4 4 6.9C19.5 16.4 12 21 12 21z"/></svg>
+        <span id="wishlist-count" class="absolute -top-0.5 -right-0.5 bg-mustard text-ink text-[10px] font-mono font-semibold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      </button>
+      <button id="cart-btn" class="relative w-10 h-10 rounded-full hover:bg-fog flex items-center justify-center transition" aria-label="Open cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>
+        <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-cobalt text-white text-[10px] font-mono font-semibold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="md:hidden px-4 pb-3">
+    <div class="flex items-center relative">
+      <svg class="absolute left-3 text-ink/35" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="search-input-mobile" type="text" placeholder="Search products…" class="w-full bg-fog rounded-full pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-cobalt/40" aria-label="Search products">
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1400px] mx-auto px-4 md:px-8 py-8" id="grid-top">
+
+  <div class="mb-6">
+    <p class="font-mono text-xs text-ink/45 uppercase tracking-widest mb-1">Full Catalogue</p>
+    <h1 class="font-display text-2xl md:text-3xl font-600">Shop All Goods</h1>
+  </div>
+
+  <!-- ============ TOOLBAR ============ -->
+  <div class="border border-hairline rounded-2xl p-4 md:p-5 mb-8 flex flex-col gap-4">
+    <div class="flex flex-wrap items-center gap-2" id="category-pills" role="group" aria-label="Filter by category"></div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-hairline">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="flex items-center gap-2 text-sm">
+          <span class="text-ink/50 font-mono text-xs uppercase tracking-wide">Sort</span>
+          <select id="sort-select" class="border border-hairline rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-cobalt/40 bg-white">
+            <option value="newest">Newest</option>
+            <option value="popular">Most Popular</option>
+            <option value="rating">Highest Rated</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </label>
+
+        <div class="flex items-center border border-hairline rounded-lg overflow-hidden text-sm" role="group" aria-label="Grid density">
+          <button data-density="comfortable" class="density-btn px-3 py-2 bg-ink text-white font-mono text-xs">Comfortable</button>
+          <button data-density="compact" class="density-btn px-3 py-2 font-mono text-xs">Compact</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-ink/50 font-mono text-xs uppercase tracking-wide hidden sm:inline">Browse mode</span>
+        <div class="flex items-center border border-hairline rounded-lg overflow-hidden text-sm" role="group" aria-label="Browsing mode">
+          <button data-mode="pagination" class="mode-btn px-3 py-2 bg-ink text-white font-mono text-xs">Pages</button>
+          <button data-mode="infinite" class="mode-btn px-3 py-2 font-mono text-xs">Infinite Scroll</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="results-count" class="text-xs text-ink/45 font-mono"></p>
+  </div>
+
+  <!-- ============ GRID ============ -->
+  <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden text-center py-24">
+    <p class="font-display text-xl mb-2">No products match those filters</p>
+    <p class="text-ink/50 text-sm mb-6">Try a different category or clear your search.</p>
+    <button id="clear-filters-btn" class="border border-ink px-6 py-2.5 rounded-full text-sm font-medium hover:bg-ink hover:text-white transition">Clear filters</button>
+  </div>
+
+  <!-- Infinite scroll sentinel + spinner -->
+  <div id="infinite-sentinel" class="hidden py-10 flex justify-center">
+    <div class="flex items-center gap-3 text-sm text-ink/50 font-mono">
+      <span class="w-4 h-4 border-2 border-ink/20 border-t-cobalt rounded-full animate-spin"></span> Loading more…
+    </div>
+  </div>
+  <p id="infinite-end" class="hidden text-center py-10 text-sm text-ink/40 font-mono">— end of catalogue —</p>
+
+  <!-- Pagination controls -->
+  <div id="pagination-controls" class="flex items-center justify-center gap-1.5 mt-10"></div>
+
+</main>
+
+<!-- ============ STICKY COMPARE BAR ============ -->
+<div id="compare-bar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-ink text-white rounded-full pl-5 pr-2 py-2 shadow-2xl flex items-center gap-4 max-w-[92vw]">
+  <span class="text-sm font-mono"><span id="compare-count">0</span> selected to compare</span>
+  <button id="compare-open-btn" class="bg-cobalt hover:bg-cobalt-dark px-4 py-2 rounded-full text-sm font-medium transition">Compare</button>
+  <button id="compare-clear-btn" class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition" aria-label="Clear comparison">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+
+<!-- ============ QUICK VIEW MODAL ============ -->
+<div id="quickview-modal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="qv-title">
+  <div class="modal-panel bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+    <button id="qv-close" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white shadow flex items-center justify-center hover:bg-fog transition" aria-label="Close quick view">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="grid md:grid-cols-2 gap-0">
+      <div class="p-6 md:p-8">
+        <div class="rounded-xl overflow-hidden bg-fog aspect-square mb-3">
+          <img id="qv-main-img" src="" alt="" class="w-full h-full object-cover">
+        </div>
+        <div class="grid grid-cols-4 gap-2" id="qv-thumbs"></div>
+      </div>
+      <div class="p-6 md:p-8 md:pl-0 flex flex-col">
+        <p id="qv-category" class="font-mono text-xs uppercase tracking-widest text-cobalt mb-2"></p>
+        <h2 id="qv-title" class="font-display text-2xl font-600 mb-2"></h2>
+        <div class="flex items-center gap-2 mb-4">
+          <span id="qv-stars" class="star-row text-sm"></span>
+          <span id="qv-reviews" class="text-xs text-ink/45 font-mono"></span>
+        </div>
+        <div class="flex items-baseline gap-2 mb-5">
+          <span id="qv-price" class="font-mono text-2xl font-semibold"></span>
+          <span id="qv-mrp" class="font-mono text-ink/35 text-sm line-through"></span>
+        </div>
+        <p id="qv-desc" class="text-sm text-ink/60 leading-relaxed mb-6"></p>
+
+        <div class="flex items-center gap-4 mb-6">
+          <span class="text-sm font-medium">Quantity</span>
+          <div class="flex items-center border border-hairline rounded-full">
+            <button id="qv-qty-minus" class="w-9 h-9 flex items-center justify-center text-lg" aria-label="Decrease quantity">–</button>
+            <span id="qv-qty-value" class="w-8 text-center font-mono text-sm">1</span>
+            <button id="qv-qty-plus" class="w-9 h-9 flex items-center justify-center text-lg" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+
+        <div class="mt-auto flex flex-col gap-3">
+          <button id="qv-add-to-cart" class="btn-ripple bg-ink hover:bg-cobalt text-white py-3.5 rounded-full font-medium transition-colors">Add to Cart</button>
+          <button id="qv-wishlist-toggle" class="border border-hairline hover:border-ink py-3 rounded-full font-medium text-sm flex items-center justify-center gap-2 transition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.4 2.4 5 6 5c2 0 3.4 1 6 3.5C14.6 6 16 5 18 5c3.6 0 5.5 3.4 4 6.9C19.5 16.4 12 21 12 21z"/></svg>
+            <span id="qv-wishlist-label">Save to Wishlist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COMPARE OVERLAY ============ -->
+<div id="compare-modal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Compare products">
+  <div class="modal-panel bg-white rounded-2xl max-w-4xl w-full max-h-[88vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-hairline">
+      <h2 class="font-display text-xl font-600">Compare Products</h2>
+      <button id="compare-close" class="w-9 h-9 rounded-full hover:bg-fog flex items-center justify-center transition" aria-label="Close comparison">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="overflow-x-auto p-6">
+      <table class="w-full text-sm border-collapse" id="compare-table"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CART DRAWER ============ -->
+<div id="cart-overlay" class="hidden fixed inset-0 z-50 modal-backdrop"></div>
+<aside id="cart-drawer" class="drawer closed fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-white shadow-2xl flex flex-col">
+  <div class="ticket-edge flex items-center justify-between px-6 py-5 border-b-2 border-dashed border-hairline">
+    <h2 class="font-display text-xl font-600">Your Cart</h2>
+    <button id="cart-close" class="w-9 h-9 rounded-full hover:bg-fog flex items-center justify-center transition" aria-label="Close cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-4"></div>
+  <div class="ticket-edge border-t-2 border-dashed border-hairline px-6 py-5">
+    <div class="flex items-center justify-between mb-4 font-mono">
+      <span class="text-sm text-ink/50">Subtotal</span>
+      <span id="cart-subtotal" class="text-lg font-semibold">$0.00</span>
+    </div>
+    <button id="checkout-btn" class="w-full bg-cobalt hover:bg-cobalt-dark text-white py-3.5 rounded-full font-medium transition-colors">Checkout</button>
+  </div>
+</aside>
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 items-end"></div>
+
+<footer class="border-t border-hairline mt-16 py-10">
+  <div class="max-w-[1400px] mx-auto px-4 md:px-8 text-center text-xs text-ink/40 font-mono">
+    Demo storefront — all products and prices are illustrative. © 2026 Fieldnote Goods.
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   SAFE STORAGE
+   Wishlist persistence uses localStorage per the brief. In a sandboxed
+   preview iframe (like an in-chat artifact viewer) storage APIs can throw;
+   this wrapper falls back to an in-memory object so the page never breaks —
+   it just won't persist across a real page reload in that sandboxed case.
+   Open this file directly in a browser (double-click, or host it) for full
+   persistence across reloads.
+========================================================================= */
+const safeStorage = (() => {
+  let memory = {};
+  let ok = false;
+  try {
+    localStorage.setItem('__test__','1');
+    localStorage.removeItem('__test__');
+    ok = true;
+  } catch(e){ ok = false; }
+  return {
+    get(key){
+      if(ok){ try{ return localStorage.getItem(key); } catch(e){ return memory[key] ?? null; } }
+      return memory[key] ?? null;
+    },
+    set(key, val){
+      if(ok){ try{ localStorage.setItem(key, val); return; } catch(e){ /* fall through */ } }
+      memory[key] = val;
+    }
+  };
+})();
+
+/* =========================================================================
+   PRODUCT DATA — 28 items across 6 categories
+========================================================================= */
+const IMG = (id, w=600, q=80) => `https://images.unsplash.com/${id}?w=${w}&q=${q}&auto=format&fit=crop`;
+
+const RAW_PRODUCTS = [
+  {name:'Aria Over-Ear Headphones', cat:'Audio', img:'photo-1505740420928-5e560c06d30e', alt:'photo-1518444065439-e933c06ce9cd', price:189, mrp:220, rating:4.7, reviews:412, days:2, desc:'Closed-back over-ear headphones with 40mm drivers and 30-hour battery life. Tuned for warmth without losing detail.'},
+  {name:'Aria Wireless Earbuds', cat:'Audio', img:'photo-1518444065439-e933c06ce9cd', alt:'photo-1608043152269-423dbba4e7e1', price:99, mrp:null, rating:4.4, reviews:301, days:12, desc:'True wireless earbuds with active noise cancellation and a compact charging case.'},
+  {name:'Field Portable Speaker', cat:'Audio', img:'photo-1608043152269-423dbba4e7e1', alt:'photo-1505740420928-5e560c06d30e', price:79, mrp:95, rating:4.5, reviews:188, days:40, desc:'Weatherproof speaker with 12-hour playtime, built for the trail or the porch.'},
+  {name:'Aria Studio Monitor Set', cat:'Audio', img:'photo-1518444065439-e933c06ce9cd', alt:'photo-1608043152269-423dbba4e7e1', price:349, mrp:399, rating:4.8, reviews:76, days:5, desc:'A pair of reference-grade studio monitors for accurate mixing at home.'},
+
+  {name:'Meridian Steel Watch', cat:'Wearables', img:'photo-1523275335684-37898b6baf30', alt:'photo-1434493907317-a46b5bbe7834', price:249, mrp:null, rating:4.6, reviews:230, days:8, desc:'A 40mm stainless case with sapphire crystal and a Swiss quartz movement.'},
+  {name:'Meridian Smartwatch', cat:'Wearables', img:'photo-1434493907317-a46b5bbe7834', alt:'photo-1523275335684-37898b6baf30', price:279, mrp:319, rating:4.3, reviews:512, days:1, desc:'Always-on display, seven-day battery life, and offline GPS tracking.'},
+  {name:'Trail Fitness Band', cat:'Wearables', img:'photo-1523275335684-37898b6baf30', alt:'photo-1434493907317-a46b5bbe7834', price:59, mrp:null, rating:4.1, reviews:640, days:60, desc:'Lightweight activity tracker with heart-rate monitoring and 10-day battery.'},
+
+  {name:'Ridgeline Daypack', cat:'Bags', img:'photo-1553062407-98eeb64c6a62', alt:'photo-1547949003-9792a18a2645', price:129, mrp:150, rating:4.7, reviews:342, days:3, desc:'A 22-liter daypack in weatherproof canvas with a padded 15" laptop sleeve.'},
+  {name:'Ridgeline Weekender', cat:'Bags', img:'photo-1547949003-9792a18a2645', alt:'photo-1590874103328-eac38a683ce7', price:169, mrp:null, rating:4.5, reviews:120, days:25, desc:'A 40-liter travel duffel with a rigid base and detachable shoulder strap.'},
+  {name:'Commuter Tote', cat:'Bags', img:'photo-1590874103328-eac38a683ce7', alt:'photo-1553062407-98eeb64c6a62', price:89, mrp:105, rating:4.4, reviews:98, days:14, desc:'Structured tote in vegetable-tanned leather, sized for a 13" laptop and a notebook.'},
+  {name:'Slim Bifold Wallet', cat:'Bags', img:'photo-1627123424574-724758594e93', alt:'photo-1590874103328-eac38a683ce7', price:45, mrp:null, rating:4.6, reviews:270, days:33, desc:'A minimal bifold in full-grain leather with six card slots and a cash pocket.'},
+
+  {name:'Runner Low-Top Sneaker', cat:'Footwear', img:'photo-1542291026-7eec264c27ff', alt:'photo-1595950653106-6c9ebd614d3a', price:118, mrp:140, rating:4.5, reviews:890, days:6, desc:'A breathable knit upper on a responsive foam midsole for daily miles.'},
+  {name:'Trailhead Hiking Boot', cat:'Footwear', img:'photo-1595950653106-6c9ebd614d3a', alt:'photo-1542291026-7eec264c27ff', price:159, mrp:null, rating:4.7, reviews:214, days:19, desc:'Waterproof leather boot with a Vibram outsole for uneven terrain.'},
+  {name:'Studio Canvas Slip-On', cat:'Footwear', img:'photo-1542291026-7eec264c27ff', alt:'photo-1595950653106-6c9ebd614d3a', price:68, mrp:80, rating:4.2, reviews:156, days:47, desc:'A classic canvas slip-on with a cushioned footbed, built for warm days.'},
+
+  {name:'Aviator Sunglasses', cat:'Accessories', img:'photo-1572635196237-14b3f281503f', alt:'photo-1511499767150-a48a237f0083', price:135, mrp:160, rating:4.6, reviews:301, days:9, desc:'Polarized lenses in a titanium frame, with a hard case included.'},
+  {name:'Round Acetate Sunglasses', cat:'Accessories', img:'photo-1511499767150-a48a237f0083', alt:'photo-1572635196237-14b3f281503f', price:98, mrp:null, rating:4.3, reviews:145, days:21, desc:'Hand-polished acetate frames with UV400 protection.'},
+  {name:'Everyday Compact Camera', cat:'Accessories', img:'photo-1502920917128-1aa500764cbd', alt:'photo-1519183071298-a2962be90b8e', price:429, mrp:479, rating:4.8, reviews:88, days:4, desc:'A pocketable point-and-shoot with a fast f/1.8 lens and film-style presets.'},
+  {name:'Vintage Rangefinder Camera', cat:'Accessories', img:'photo-1519183071298-a2962be90b8e', alt:'photo-1502920917128-1aa500764cbd', price:389, mrp:null, rating:4.9, reviews:52, days:55, desc:'A manual-focus rangefinder body built for deliberate, unhurried shooting.'},
+
+  {name:'Mechanical Keyboard 75%', cat:'Desk', img:'photo-1587829741301-dc798b83add3', alt:'photo-1527864550417-7fd91fc51a46', price:159, mrp:189, rating:4.7, reviews:410, days:7, desc:'Hot-swappable switches, a machined aluminum case, and per-key backlighting.'},
+  {name:'Ergonomic Wireless Mouse', cat:'Desk', img:'photo-1527864550417-7fd91fc51a46', alt:'photo-1587829741301-dc798b83add3', price:69, mrp:null, rating:4.4, reviews:520, days:16, desc:'A vertical grip mouse designed to reduce wrist strain through long sessions.'},
+  {name:'Task Office Chair', cat:'Desk', img:'photo-1580480055273-228ff5388ef8', alt:'photo-1507473885765-e6ed057f782c', price:389, mrp:449, rating:4.6, reviews:167, days:11, desc:'Breathable mesh back with 4D armrests and adjustable lumbar support.'},
+  {name:'Articulating Desk Lamp', cat:'Desk', img:'photo-1507473885765-e6ed057f782c', alt:'photo-1580480055273-228ff5388ef8', price:79, mrp:95, rating:4.5, reviews:245, days:29, desc:'A dimmable LED task lamp with a full range of motion and USB-C passthrough.'},
+  {name:'Ceramic Desk Planter', cat:'Desk', img:'photo-1485955900006-10f4d324d411', alt:'photo-1514228742587-6b1558fcca3d', price:32, mrp:null, rating:4.3, reviews:78, days:65, desc:'A hand-glazed ceramic planter sized for a small desk succulent.'},
+  {name:'Everyday Ceramic Mug', cat:'Desk', img:'photo-1514228742587-6b1558fcca3d', alt:'photo-1485955900006-10f4d324d411', price:24, mrp:28, rating:4.6, reviews:390, days:38, desc:'A 12oz stoneware mug, dishwasher and microwave safe.'},
+  {name:'Dot-Grid Notebook Set', cat:'Desk', img:'photo-1531346878377-a5be20888e57', alt:'photo-1587829741301-dc798b83add3', price:28, mrp:null, rating:4.7, reviews:610, days:2, desc:'A set of three A5 dot-grid notebooks with a stitched binding that lies flat.'},
+
+  {name:'Aria Bookshelf Speakers', cat:'Audio', img:'photo-1608043152269-423dbba4e7e1', alt:'photo-1505740420928-5e560c06d30e', price:299, mrp:340, rating:4.6, reviews:64, days:31, desc:'A compact pair of bookshelf speakers with a warm, room-filling sound.'},
+  {name:'Meridian Leather Strap', cat:'Wearables', img:'photo-1434493907317-a46b5bbe7834', alt:'photo-1523275335684-37898b6baf30', price:39, mrp:null, rating:4.4, reviews:112, days:44, desc:'A hand-stitched leather strap compatible with the Meridian watch line.'},
+  {name:'Field Crossbody Bag', cat:'Bags', img:'photo-1590874103328-eac38a683ce7', alt:'photo-1627123424574-724758594e93', price:75, mrp:88, rating:4.3, reviews:140, days:22, desc:'A compact crossbody with a padded pocket for a phone and a passport.'},
+  {name:'Trail Runner High-Top', cat:'Footwear', img:'photo-1595950653106-6c9ebd614d3a', alt:'photo-1542291026-7eec264c27ff', price:132, mrp:null, rating:4.5, reviews:203, days:17, desc:'A high-top trail sneaker with reinforced toe protection and a grippy lug sole.'},
+  {name:'Monitor Light Bar', cat:'Desk', img:'photo-1507473885765-e6ed057f782c', alt:'photo-1485955900006-10f4d324d411', price:59, mrp:69, rating:4.5, reviews:189, days:26, desc:'A glare-free light bar that clips to the top of a monitor, freeing up desk space.'},
+];
+
+const PRODUCTS = RAW_PRODUCTS.map((p, i) => ({
+  id: 'p' + (i+1),
+  ...p,
+  createdAt: Date.now() - p.days*86400000,
+}));
+
+const CATEGORIES = ['All', ...new Set(PRODUCTS.map(p=>p.cat))];
+
+/* =========================================================================
+   STATE
+========================================================================= */
+const state = {
+  category: 'All',
+  search: '',
+  sort: 'newest',
+  density: 'comfortable',
+  mode: 'pagination',
+  page: 1,
+  perPage: 8,
+  infiniteLoaded: 8,
+  wishlist: new Set(JSON.parse(safeStorage.get('fg_wishlist') || '[]')),
+  compare: new Set(),
+  cart: new Map(), // id -> qty
+};
+
+let qvState = { id: null, qty: 1 };
+
+/* =========================================================================
+   DERIVED DATA
+========================================================================= */
+function getFiltered(){
+  let list = PRODUCTS.filter(p =>
+    (state.category === 'All' || p.cat === state.category) &&
+    (state.search.trim() === '' || p.name.toLowerCase().includes(state.search.trim().toLowerCase()))
+  );
+  switch(state.sort){
+    case 'price-asc': list.sort((a,b)=>a.price-b.price); break;
+    case 'price-desc': list.sort((a,b)=>b.price-a.price); break;
+    case 'newest': list.sort((a,b)=>b.createdAt-a.createdAt); break;
+    case 'popular': list.sort((a,b)=>b.reviews-a.reviews); break;
+    case 'rating': list.sort((a,b)=>b.rating-a.rating); break;
+  }
+  return list;
+}
+
+/* =========================================================================
+   RENDER: PRODUCT GRID
+========================================================================= */
+function starString(rating){
+  const full = Math.round(rating);
+  return '★'.repeat(full) + '☆'.repeat(5-full);
+}
+
+function cardTemplate(p){
+  const inWishlist = state.wishlist.has(p.id);
+  const inCompare = state.compare.has(p.id);
+  return `
+  <div class="product-card reveal bg-white border border-hairline rounded-2xl overflow-hidden" data-id="${p.id}">
+    <div class="card-media aspect-square relative cursor-pointer" data-open-qv="${p.id}">
+      <span class="price-tag ${p.mrp ? 'sale':''}">$${p.price.toFixed(2)}</span>
+      <img class="primary absolute inset-0 w-full h-full object-cover" src="${IMG(p.img,500)}" alt="${p.name}" loading="lazy">
+      <img class="secondary absolute inset-0 w-full h-full object-cover" src="${IMG(p.alt,500)}" alt="" aria-hidden="true" loading="lazy">
+      <button class="wishlist-toggle absolute top-2.5 right-2.5 w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center hover:scale-105 transition" data-id="${p.id}" aria-label="${inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}" aria-pressed="${inWishlist}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="${inWishlist ? '#E8A33D' : 'none'}" stroke="${inWishlist ? '#E8A33D' : 'currentColor'}" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.4 2.4 5 6 5c2 0 3.4 1 6 3.5C14.6 6 16 5 18 5c3.6 0 5.5 3.4 4 6.9C19.5 16.4 12 21 12 21z"/></svg>
+      </button>
+    </div>
+    <div class="p-3.5">
+      <p class="font-mono text-[10px] uppercase tracking-widest text-ink/40 mb-1">${p.cat}</p>
+      <button class="text-left w-full mb-1.5" data-open-qv="${p.id}">
+        <p class="font-medium text-sm line-clamp-1 hover:text-cobalt transition-colors">${p.name}</p>
+      </button>
+      <div class="flex items-center gap-1.5 mb-2.5">
+        <span class="star-row text-xs">${starString(p.rating)}</span>
+        <span class="text-[11px] text-ink/40 font-mono">(${p.reviews})</span>
+      </div>
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-baseline gap-1.5 font-mono">
+          <span class="font-semibold text-sm">$${p.price.toFixed(2)}</span>
+          ${p.mrp ? `<span class="text-ink/35 text-xs line-through">$${p.mrp.toFixed(2)}</span>` : ''}
+        </div>
+        <label class="flex items-center gap-1.5 text-[11px] text-ink/50 font-mono cursor-pointer select-none">
+          <input type="checkbox" class="cmp compare-toggle" data-id="${p.id}" ${inCompare ? 'checked' : ''}> Compare
+        </label>
+      </div>
+      <button class="add-to-cart-btn w-full bg-ink hover:bg-cobalt text-white text-sm py-2.5 rounded-full font-medium transition-colors" data-id="${p.id}">Add to Cart</button>
+    </div>
+  </div>`;
+}
+
+function densityClasses(){
+  return state.density === 'compact'
+    ? 'grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4'
+    : 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6';
+}
+
+function renderGrid(){
+  const grid = document.getElementById('product-grid');
+  grid.className = densityClasses();
+  const filtered = getFiltered();
+  const emptyState = document.getElementById('empty-state');
+  const resultsCount = document.getElementById('results-count');
+
+  if(filtered.length === 0){
+    grid.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    resultsCount.textContent = '0 products found';
+    document.getElementById('pagination-controls').innerHTML = '';
+    document.getElementById('infinite-sentinel').classList.add('hidden');
+    document.getElementById('infinite-end').classList.add('hidden');
+    return;
+  }
+  emptyState.classList.add('hidden');
+
+  let visible;
+  if(state.mode === 'pagination'){
+    const start = (state.page-1)*state.perPage;
+    visible = filtered.slice(start, start+state.perPage);
+    resultsCount.textContent = `Showing ${start+1}–${Math.min(start+state.perPage, filtered.length)} of ${filtered.length} products`;
+  } else {
+    visible = filtered.slice(0, state.infiniteLoaded);
+    resultsCount.textContent = `Showing ${visible.length} of ${filtered.length} products`;
+  }
+
+  grid.innerHTML = visible.map(cardTemplate).join('');
+
+  requestAnimationFrame(()=>{
+    grid.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+  });
+
+  attachCardListeners();
+  renderPagination(filtered.length);
+  renderInfiniteState(filtered.length);
+}
+
+function attachCardListeners(){
+  document.querySelectorAll('[data-open-qv]').forEach(el=>{
+    el.addEventListener('click', ()=>openQuickView(el.dataset.openQv));
+  });
+  document.querySelectorAll('.wishlist-toggle').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); toggleWishlist(el.dataset.id, el); });
+  });
+  document.querySelectorAll('.compare-toggle').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); toggleCompare(el.dataset.id); });
+  });
+  document.querySelectorAll('.add-to-cart-btn').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); addToCart(el.dataset.id, 1); });
+  });
+}
+
+/* =========================================================================
+   PAGINATION
+========================================================================= */
+function renderPagination(totalItems){
+  const wrap = document.getElementById('pagination-controls');
+  if(state.mode !== 'pagination'){ wrap.innerHTML = ''; return; }
+  const totalPages = Math.max(1, Math.ceil(totalItems/state.perPage));
+  if(state.page > totalPages) state.page = totalPages;
+
+  let html = '';
+  html += `<button class="page-btn w-9 h-9 rounded-full border border-hairline text-sm hover:border-ink transition disabled:opacity-30" data-page="${state.page-1}" ${state.page<=1?'disabled':''} aria-label="Previous page">‹</button>`;
+
+  const pages = new Set([1, totalPages, state.page, state.page-1, state.page+1]);
+  let last = 0;
+  [...pages].filter(p=>p>=1 && p<=totalPages).sort((a,b)=>a-b).forEach(p=>{
+    if(last && p - last > 1) html += `<span class="w-9 h-9 flex items-center justify-center text-ink/30 text-sm">…</span>`;
+    html += `<button class="page-btn w-9 h-9 rounded-full text-sm font-mono transition ${p===state.page ? 'bg-ink text-white' : 'border border-hairline hover:border-ink'}" data-page="${p}">${p}</button>`;
+    last = p;
+  });
+
+  html += `<button class="page-btn w-9 h-9 rounded-full border border-hairline text-sm hover:border-ink transition disabled:opacity-30" data-page="${state.page+1}" ${state.page>=totalPages?'disabled':''} aria-label="Next page">›</button>`;
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('.page-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.page = parseInt(btn.dataset.page);
+      renderGrid();
+      document.getElementById('grid-top').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
+/* =========================================================================
+   INFINITE SCROLL
+========================================================================= */
+function renderInfiniteState(totalItems){
+  const sentinel = document.getElementById('infinite-sentinel');
+  const endMsg = document.getElementById('infinite-end');
+  if(state.mode !== 'infinite'){ sentinel.classList.add('hidden'); endMsg.classList.add('hidden'); return; }
+  if(state.infiniteLoaded < totalItems){
+    sentinel.classList.remove('hidden'); endMsg.classList.add('hidden');
+  } else {
+    sentinel.classList.add('hidden'); endMsg.classList.remove('hidden');
+  }
+}
+
+let infiniteLoading = false;
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting && state.mode === 'infinite' && !infiniteLoading){
+      const total = getFiltered().length;
+      if(state.infiniteLoaded < total){
+        infiniteLoading = true;
+        setTimeout(()=>{
+          state.infiniteLoaded = Math.min(total, state.infiniteLoaded + 8);
+          renderGrid();
+          infiniteLoading = false;
+        }, 500); // simulated network delay
+      }
+    }
+  });
+}, { rootMargin: '200px' });
+observer.observe(document.getElementById('infinite-sentinel'));
+
+/* =========================================================================
+   CATEGORY PILLS
+========================================================================= */
+function renderCategoryPills(){
+  const wrap = document.getElementById('category-pills');
+  wrap.innerHTML = CATEGORIES.map(c => `
+    <button class="cat-pill px-4 py-2 rounded-full text-sm font-medium border transition ${c===state.category ? 'bg-ink text-white border-ink' : 'border-hairline hover:border-ink'}" data-cat="${c}">${c}</button>
+  `).join('');
+  wrap.querySelectorAll('.cat-pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.category = btn.dataset.cat;
+      resetBrowsing();
+      renderCategoryPills();
+      renderGrid();
+    });
+  });
+}
+
+function resetBrowsing(){ state.page = 1; state.infiniteLoaded = state.perPage; }
+
+/* =========================================================================
+   WISHLIST
+========================================================================= */
+function toggleWishlist(id, btnEl){
+  if(state.wishlist.has(id)) state.wishlist.delete(id);
+  else state.wishlist.add(id);
+  safeStorage.set('fg_wishlist', JSON.stringify([...state.wishlist]));
+  updateWishlistCount();
+  if(btnEl){
+    btnEl.classList.add('heart-pop');
+    setTimeout(()=>btnEl.classList.remove('heart-pop'), 350);
+  }
+  const p = PRODUCTS.find(x=>x.id===id);
+  showToast(state.wishlist.has(id) ? `Saved "${p.name}" to wishlist` : `Removed "${p.name}" from wishlist`);
+  renderGrid();
+}
+function updateWishlistCount(){
+  document.getElementById('wishlist-count').textContent = state.wishlist.size;
+}
+
+/* =========================================================================
+   COMPARE
+========================================================================= */
+function toggleCompare(id){
+  if(state.compare.has(id)) state.compare.delete(id);
+  else {
+    if(state.compare.size >= 4){ showToast('You can compare up to 4 products at a time'); renderGrid(); return; }
+    state.compare.add(id);
+  }
+  renderCompareBar();
+  renderGrid();
+}
+function renderCompareBar(){
+  const bar = document.getElementById('compare-bar');
+  document.getElementById('compare-count').textContent = state.compare.size;
+  bar.classList.toggle('hidden', state.compare.size === 0);
+}
+function renderCompareTable(){
+  const ids = [...state.compare];
+  const items = ids.map(id => PRODUCTS.find(p=>p.id===id));
+  const table = document.getElementById('compare-table');
+  if(items.length === 0){
+    table.innerHTML = `<tr><td class="text-ink/50 text-sm py-6">No products selected yet — check "Compare" on a few product cards first.</td></tr>`;
+    return;
+  }
+  const rows = [
+    { label:'', render:p=>`<img src="${IMG(p.img,220)}" alt="${p.name}" class="w-full aspect-square object-cover rounded-lg">` },
+    { label:'Name', render:p=>`<span class="font-medium text-sm">${p.name}</span>` },
+    { label:'Category', render:p=>`<span class="font-mono text-xs text-ink/60">${p.cat}</span>` },
+    { label:'Price', render:p=>`<span class="font-mono font-semibold">$${p.price.toFixed(2)}</span>` },
+    { label:'Rating', render:p=>`<span class="star-row text-xs">${starString(p.rating)}</span> <span class="font-mono text-xs text-ink/40">(${p.reviews})</span>` },
+    { label:'', render:p=>`<button class="text-xs font-mono text-ink/40 hover:text-ink underline remove-compare" data-id="${p.id}">Remove</button>` },
+  ];
+  table.innerHTML = rows.map(row => `
+    <tr class="border-b border-hairline last:border-0">
+      <th class="text-left text-xs font-mono uppercase tracking-wide text-ink/40 py-3 pr-4 w-24 align-top">${row.label}</th>
+      ${items.map(p => `<td class="py-3 pr-4 align-top min-w-[150px]">${row.render(p)}</td>`).join('')}
+    </tr>
+  `).join('');
+
+  table.querySelectorAll('.remove-compare').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.compare.delete(btn.dataset.id);
+      renderCompareBar(); renderGrid(); renderCompareTable();
+      if(state.compare.size===0) document.getElementById('compare-modal').classList.add('hidden');
+    });
+  });
+}
+
+/* =========================================================================
+   CART
+========================================================================= */
+function addToCart(id, qty){
+  state.cart.set(id, (state.cart.get(id)||0) + qty);
+  updateCartCount();
+  renderCartItems();
+  const p = PRODUCTS.find(x=>x.id===id);
+  showToast(`Added "${p.name}" to cart`);
+}
+function updateCartCount(){
+  let total = 0;
+  state.cart.forEach(qty => total += qty);
+  document.getElementById('cart-count').textContent = total;
+}
+function renderCartItems(){
+  const wrap = document.getElementById('cart-items');
+  if(state.cart.size === 0){
+    wrap.innerHTML = `<div class="text-center py-16 text-sm text-ink/45">Your cart is empty.<br>Add something you like the look of.</div>`;
+    document.getElementById('cart-subtotal').textContent = '$0.00';
+    return;
+  }
+  let subtotal = 0;
+  wrap.innerHTML = [...state.cart.entries()].map(([id, qty])=>{
+    const p = PRODUCTS.find(x=>x.id===id);
+    subtotal += p.price * qty;
+    return `
+    <div class="flex gap-3 items-center" data-cart-row="${id}">
+      <img src="${IMG(p.img,150)}" alt="${p.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium line-clamp-1">${p.name}</p>
+        <p class="font-mono text-xs text-ink/45 mb-1.5">$${p.price.toFixed(2)}</p>
+        <div class="flex items-center gap-2">
+          <button class="cart-qty-minus w-6 h-6 border border-hairline rounded-full text-xs" data-id="${id}" aria-label="Decrease quantity">–</button>
+          <span class="font-mono text-xs w-4 text-center">${qty}</span>
+          <button class="cart-qty-plus w-6 h-6 border border-hairline rounded-full text-xs" data-id="${id}" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+      <button class="cart-remove text-ink/30 hover:text-ink transition shrink-0" data-id="${id}" aria-label="Remove from cart">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+  document.getElementById('cart-subtotal').textContent = '$' + subtotal.toFixed(2);
+
+  wrap.querySelectorAll('.cart-qty-plus').forEach(b=>b.addEventListener('click', ()=>{ state.cart.set(b.dataset.id, state.cart.get(b.dataset.id)+1); updateCartCount(); renderCartItems(); }));
+  wrap.querySelectorAll('.cart-qty-minus').forEach(b=>b.addEventListener('click', ()=>{
+    const cur = state.cart.get(b.dataset.id);
+    if(cur<=1) state.cart.delete(b.dataset.id); else state.cart.set(b.dataset.id, cur-1);
+    updateCartCount(); renderCartItems();
+  }));
+  wrap.querySelectorAll('.cart-remove').forEach(b=>b.addEventListener('click', ()=>{ state.cart.delete(b.dataset.id); updateCartCount(); renderCartItems(); }));
+}
+
+/* =========================================================================
+   QUICK VIEW MODAL
+========================================================================= */
+function openQuickView(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  qvState = { id, qty: 1 };
+  document.getElementById('qv-category').textContent = p.cat;
+  document.getElementById('qv-title').textContent = p.name;
+  document.getElementById('qv-stars').textContent = starString(p.rating);
+  document.getElementById('qv-reviews').textContent = `(${p.reviews} reviews)`;
+  document.getElementById('qv-price').textContent = '$' + p.price.toFixed(2);
+  document.getElementById('qv-mrp').textContent = p.mrp ? '$' + p.mrp.toFixed(2) : '';
+  document.getElementById('qv-desc').textContent = p.desc;
+  document.getElementById('qv-qty-value').textContent = '1';
+  document.getElementById('qv-main-img').src = IMG(p.img, 800);
+  document.getElementById('qv-main-img').alt = p.name;
+
+  const gallery = [p.img, p.alt, p.img, p.alt];
+  document.getElementById('qv-thumbs').innerHTML = gallery.map((img,i) => `
+    <button class="qv-thumb rounded-lg overflow-hidden aspect-square border-2 ${i===0?'border-ink':'border-transparent'} hover:border-ink transition" data-img="${img}">
+      <img src="${IMG(img,160)}" alt="View ${i+1}" class="w-full h-full object-cover">
+    </button>
+  `).join('');
+  document.querySelectorAll('.qv-thumb').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('qv-main-img').src = IMG(btn.dataset.img, 800);
+      document.querySelectorAll('.qv-thumb').forEach(b=>b.classList.remove('border-ink'));
+      btn.classList.add('border-ink');
+    });
+  });
+
+  updateQvWishlistLabel();
+  document.getElementById('quickview-modal').classList.remove('hidden');
+  document.getElementById('quickview-modal').classList.add('flex');
+}
+function updateQvWishlistLabel(){
+  const inList = state.wishlist.has(qvState.id);
+  document.getElementById('qv-wishlist-label').textContent = inList ? 'Saved to Wishlist' : 'Save to Wishlist';
+}
+function closeQuickView(){
+  document.getElementById('quickview-modal').classList.add('hidden');
+  document.getElementById('quickview-modal').classList.remove('flex');
+}
+
+/* =========================================================================
+   TOASTS
+========================================================================= */
+function showToast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast bg-ink text-white text-sm px-4 py-3 rounded-xl shadow-lg font-mono';
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(), 2800);
+}
+
+/* =========================================================================
+   EVENT WIRING
+========================================================================= */
+document.getElementById('search-input').addEventListener('input', (e)=>{
+  state.search = e.target.value;
+  document.getElementById('search-input-mobile').value = e.target.value;
+  resetBrowsing();
+  renderGrid();
+});
+document.getElementById('search-input-mobile').addEventListener('input', (e)=>{
+  state.search = e.target.value;
+  document.getElementById('search-input').value = e.target.value;
+  resetBrowsing();
+  renderGrid();
+});
+
+document.getElementById('sort-select').addEventListener('change', (e)=>{
+  state.sort = e.target.value;
+  resetBrowsing();
+  renderGrid();
+});
+
+document.querySelectorAll('.density-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.density = btn.dataset.density;
+    document.querySelectorAll('.density-btn').forEach(b=>{ b.classList.remove('bg-ink','text-white'); });
+    btn.classList.add('bg-ink','text-white');
+    renderGrid();
+  });
+});
+
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.mode = btn.dataset.mode;
+    document.querySelectorAll('.mode-btn').forEach(b=>{ b.classList.remove('bg-ink','text-white'); });
+    btn.classList.add('bg-ink','text-white');
+    resetBrowsing();
+    renderGrid();
+  });
+});
+
+document.getElementById('clear-filters-btn').addEventListener('click', ()=>{
+  state.category = 'All'; state.search = '';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input-mobile').value = '';
+  resetBrowsing();
+  renderCategoryPills();
+  renderGrid();
+});
+
+// Quick view
+document.getElementById('qv-close').addEventListener('click', closeQuickView);
+document.getElementById('quickview-modal').addEventListener('click', (e)=>{ if(e.target.id==='quickview-modal') closeQuickView(); });
+document.getElementById('qv-qty-minus').addEventListener('click', ()=>{ qvState.qty = Math.max(1, qvState.qty-1); document.getElementById('qv-qty-value').textContent = qvState.qty; });
+document.getElementById('qv-qty-plus').addEventListener('click', ()=>{ qvState.qty += 1; document.getElementById('qv-qty-value').textContent = qvState.qty; });
+document.getElementById('qv-add-to-cart').addEventListener('click', ()=>{ addToCart(qvState.id, qvState.qty); });
+document.getElementById('qv-wishlist-toggle').addEventListener('click', ()=>{ toggleWishlist(qvState.id); updateQvWishlistLabel(); });
+
+// Compare
+document.getElementById('compare-open-btn').addEventListener('click', ()=>{
+  renderCompareTable();
+  document.getElementById('compare-modal').classList.remove('hidden');
+  document.getElementById('compare-modal').classList.add('flex');
+});
+document.getElementById('compare-close').addEventListener('click', ()=>{
+  document.getElementById('compare-modal').classList.add('hidden');
+  document.getElementById('compare-modal').classList.remove('flex');
+});
+document.getElementById('compare-modal').addEventListener('click', (e)=>{
+  if(e.target.id==='compare-modal'){ document.getElementById('compare-modal').classList.add('hidden'); document.getElementById('compare-modal').classList.remove('flex'); }
+});
+document.getElementById('compare-clear-btn').addEventListener('click', ()=>{
+  state.compare.clear();
+  renderCompareBar(); renderGrid();
+});
+
+// Cart drawer
+function openCart(){
+  document.getElementById('cart-overlay').classList.remove('hidden');
+  document.getElementById('cart-drawer').classList.remove('closed');
+}
+function closeCart(){
+  document.getElementById('cart-overlay').classList.add('hidden');
+  document.getElementById('cart-drawer').classList.add('closed');
+}
+document.getElementById('cart-btn').addEventListener('click', openCart);
+document.getElementById('cart-close').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+document.getElementById('checkout-btn').addEventListener('click', ()=>{
+  if(state.cart.size===0){ showToast('Your cart is empty'); return; }
+  showToast('Checkout is a demo — no payment was charged');
+});
+document.getElementById('wishlist-btn').addEventListener('click', ()=>{
+  const items = [...state.wishlist].map(id=>PRODUCTS.find(p=>p.id===id)?.name).filter(Boolean);
+  showToast(items.length ? `Wishlist: ${items.slice(0,3).join(', ')}${items.length>3 ? ` +${items.length-3} more` : ''}` : 'Your wishlist is empty');
+});
+
+// Escape key closes modals/drawer
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    closeQuickView(); closeCart();
+    document.getElementById('compare-modal').classList.add('hidden');
+    document.getElementById('compare-modal').classList.remove('flex');
+  }
+});
+
+/* =========================================================================
+   INIT
+========================================================================= */
+updateWishlistCount();
+renderCategoryPills();
+renderGrid();
+</script>
+</body>
+</html>

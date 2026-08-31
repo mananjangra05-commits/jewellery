@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurel — Category Template System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#211B15;
+    --ivory:#F7F2E7;
+    --ivory-dim:#EFE7D6;
+    --green:#1E3D2D;
+    --gold:#B8863C;
+    --gold-soft:#D9B876;
+    --plum:#4A1942;
+    --rose:#C98A82;
+    --line:rgba(33,27,21,0.14);
+    --accent: var(--gold);
+    --accent-soft: var(--gold-soft);
+    --radius: 2px;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;border-bottom:1px solid var(--line);
+    background:var(--ivory);
+  }
+  .logo{
+    font-family:var(--font-display);font-size:22px;font-weight:600;letter-spacing:0.04em;
+  }
+  .logo span{color:var(--accent);}
+  .meta-tag{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+    color:rgba(33,27,21,0.55);
+  }
+
+  /* ---------- category switcher (design-tool chrome, not part of live site) ---------- */
+  .switcher-wrap{
+    background:var(--ink);padding:14px 32px;
+    position:sticky;top:0;z-index:50;
+  }
+  .switcher-label{
+    font-family:var(--font-mono);font-size:10px;color:var(--gold-soft);letter-spacing:0.14em;
+    text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  .switcher{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;
+    scrollbar-width:thin;
+  }
+  .switcher::-webkit-scrollbar{height:4px;}
+  .switcher::-webkit-scrollbar-thumb{background:var(--gold);}
+  .chip{
+    flex:none;display:flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:20px;border:1px solid rgba(247,242,231,0.18);
+    background:transparent;color:#F7F2E7cc;font-family:var(--font-body);font-size:12.5px;font-weight:500;
+    cursor:pointer;white-space:nowrap;transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--gold-soft);color:#fff;}
+  .chip.active{background:var(--gold);border-color:var(--gold);color:#211B15;font-weight:600;}
+  .chip svg{width:14px;height:14px;}
+
+  /* ---------- link divider (signature motif) ---------- */
+  .link-divider{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    padding:10px 0;background:var(--ivory);
+  }
+  .link-divider .rule{height:1px;flex:1;max-width:220px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+  .link-divider svg{width:20px;height:20px;color:var(--accent);flex:none;}
+
+  /* ---------- breadcrumb ---------- */
+  .breadcrumb{
+    padding:14px 32px 0;font-family:var(--font-mono);font-size:11px;color:rgba(33,27,21,0.5);
+    letter-spacing:0.03em;
+  }
+  .breadcrumb b{color:var(--ink);font-weight:500;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:grid;grid-template-columns:1.1fr 1fr;min-height:420px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-art{
+    position:relative;overflow:hidden;
+    background: radial-gradient(circle at 30% 30%, var(--accent-soft) 0%, var(--accent) 45%, var(--ink) 130%);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .hero-art svg{width:46%;max-width:280px;color:rgba(247,242,231,0.92);}
+  .hero-art .emblem-ring{
+    position:absolute;width:78%;aspect-ratio:1;border:1px solid rgba(247,242,231,0.25);border-radius:50%;
+  }
+  .hero-copy{
+    padding:56px 48px;display:flex;flex-direction:column;justify-content:center;gap:16px;
+  }
+  .hero-eyebrow{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);
+    font-weight:500;
+  }
+  .hero-title{
+    font-family:var(--font-display);font-size:44px;line-height:1.04;font-weight:600;margin:0;
+    max-width:520px;
+  }
+  .hero-sub{
+    font-size:15.5px;line-height:1.55;color:rgba(33,27,21,0.72);max-width:440px;margin:0;
+  }
+  .hero-ctas{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;}
+  .btn{
+    font-family:var(--font-body);font-size:13.5px;font-weight:600;padding:13px 24px;border-radius:var(--radius);
+    border:1px solid var(--ink);cursor:pointer;letter-spacing:0.01em;
+  }
+  .btn-primary{background:var(--ink);color:var(--ivory);}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .hero-stats{display:flex;gap:26px;margin-top:10px;}
+  .hero-stat b{display:block;font-family:var(--font-display);font-size:20px;}
+  .hero-stat span{font-size:11px;color:rgba(33,27,21,0.55);font-family:var(--font-mono);}
+
+  /* ---------- FILTER RAIL ---------- */
+  .filter-rail{
+    position:sticky;top:0;background:var(--ivory);border-bottom:1px solid var(--line);
+    padding:16px 32px;display:flex;gap:28px;overflow-x:auto;align-items:flex-start;
+  }
+  .filter-group{flex:none;}
+  .filter-group h5{
+    margin:0 0 8px;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;
+    color:rgba(33,27,21,0.5);font-weight:500;
+  }
+  .filter-opts{display:flex;gap:6px;flex-wrap:nowrap;}
+  .filter-pill{
+    padding:6px 12px;border:1px solid var(--line);border-radius:20px;font-size:12px;white-space:nowrap;
+    color:rgba(33,27,21,0.75);
+  }
+  .filter-pill.on{border-color:var(--accent);background:var(--accent);color:#fff;font-weight:600;}
+
+  /* ---------- PRODUCT GRID ---------- */
+  .grid-section{padding:44px 32px 8px;}
+  .grid-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px;}
+  .grid-head h3{font-family:var(--font-display);font-size:22px;margin:0;font-weight:600;}
+  .grid-head .sort{font-family:var(--font-mono);font-size:11px;color:rgba(33,27,21,0.5);}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .card{border:1px solid var(--line);background:#fff;display:flex;flex-direction:column;}
+  .card-img{
+    aspect-ratio:1;background:linear-gradient(135deg,var(--ivory-dim),var(--accent-soft) 130%);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .card-img svg{width:38%;color:var(--ink);opacity:0.55;}
+  .card-tag{
+    position:absolute;top:8px;left:8px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.06em;
+    background:var(--ink);color:var(--ivory);padding:3px 6px;text-transform:uppercase;
+  }
+  .card-body{padding:12px 14px 16px;display:flex;flex-direction:column;gap:4px;}
+  .card-body .name{font-size:13.5px;font-weight:600;}
+  .card-body .sku{font-family:var(--font-mono);font-size:10px;color:rgba(33,27,21,0.45);}
+  .card-body .price{font-family:var(--font-display);font-size:16px;margin-top:4px;}
+  .card-body .price s{font-size:12px;font-weight:400;color:rgba(33,27,21,0.4);margin-left:6px;}
+
+  /* ---------- RELATED ---------- */
+  .related{padding:52px 32px;background:var(--ivory-dim);}
+  .related h4{font-family:var(--font-display);font-size:20px;margin:0 0 4px;}
+  .related p.sub{margin:0 0 22px;font-size:13px;color:rgba(33,27,21,0.6);}
+  .related-row{display:flex;gap:16px;overflow-x:auto;}
+  .related-card{
+    flex:none;width:190px;border:1px solid var(--line);background:var(--ivory);padding:20px 16px;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .related-card svg{width:26px;height:26px;color:var(--accent);}
+  .related-card .rname{font-weight:600;font-size:14px;}
+  .related-card .rwhy{font-size:12px;color:rgba(33,27,21,0.6);line-height:1.4;}
+
+  /* ---------- SEO CONTENT ---------- */
+  .seo{padding:56px 32px 72px;display:grid;grid-template-columns:1.5fr 1fr;gap:48px;border-top:1px solid var(--line);}
+  .seo h2{font-family:var(--font-display);font-size:26px;margin:0 0 14px;}
+  .seo p{font-size:14.5px;line-height:1.7;color:rgba(33,27,21,0.78);margin:0 0 16px;}
+  .seo .tips{margin-top:18px;}
+  .seo .tips h5{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(33,27,21,0.5);margin-bottom:10px;}
+  .seo .tips ul{margin:0;padding-left:18px;}
+  .seo .tips li{font-size:13.5px;line-height:1.7;color:rgba(33,27,21,0.78);}
+  .seo-aside{border-left:1px solid var(--line);padding-left:32px;}
+  .faq{margin-bottom:18px;}
+  .faq .q{font-weight:600;font-size:13.5px;margin-bottom:4px;}
+  .faq .a{font-size:13px;color:rgba(33,27,21,0.65);line-height:1.6;}
+  .pull{
+    font-family:var(--font-display);font-style:italic;font-size:17px;line-height:1.4;color:var(--ink);
+    border-top:2px solid var(--accent);padding-top:14px;margin-top:22px;
+  }
+
+  @media (max-width: 900px){
+    .hero{grid-template-columns:1fr;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .seo{grid-template-columns:1fr;}
+    .seo-aside{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:24px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">AUREL<span>.</span></div>
+    <div class="meta-tag">Category Template System — 13 pages, 1 architecture</div>
+  </div>
+
+  <div class="switcher-wrap">
+    <span class="switcher-label">Preview a category (design tool only — not part of the live page)</span>
+    <div class="switcher" id="switcher"></div>
+  </div>
+
+  <div class="breadcrumb"><a href="#">Home</a> / <b id="bc-cat">Rings</b></div>
+
+  <section class="hero">
+    <div class="hero-art">
+      <div class="emblem-ring"></div>
+      <svg id="hero-icon" viewBox="0 0 100 100" fill="none"></svg>
+    </div>
+    <div class="hero-copy">
+      <span class="hero-eyebrow" id="hero-eyebrow">Fine Jewellery / Rings</span>
+      <h1 class="hero-title" id="hero-title">Rings, for every hand and every reason</h1>
+      <p class="hero-sub" id="hero-sub">From everyday bands to the ring you'll tell a story about — shop rings in gold, diamond and platinum, sized and certified.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary">Shop the edit</button>
+        <button class="btn btn-ghost">Find my ring size</button>
+      </div>
+      <div class="hero-stats" id="hero-stats"></div>
+    </div>
+  </section>
+
+  <div class="link-divider"><div class="rule"></div><svg id="div-icon" viewBox="0 0 100 100" fill="none"></svg><div class="rule"></div></div>
+
+  <div class="filter-rail" id="filter-rail"></div>
+
+  <section class="grid-section">
+    <div class="grid-head">
+      <h3 id="grid-title">The Rings edit — 248 designs</h3>
+      <div class="sort">SORT — POPULAR ▾</div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="related">
+    <h4>You may also like</h4>
+    <p class="sub" id="related-sub">Complete the look with jewellery that pairs naturally with what you're browsing.</p>
+    <div class="related-row" id="related-row"></div>
+  </section>
+
+  <section class="seo" id="seo-section">
+    <div class="seo-main">
+      <h2 id="seo-h2">Rings that mark the moment</h2>
+      <div id="seo-body"></div>
+      <div class="tips">
+        <h5>Styling tips</h5>
+        <ul id="seo-tips"></ul>
+      </div>
+    </div>
+    <div class="seo-aside" id="seo-faq"></div>
+  </section>
+
+<script>
+/* ---------------- icon library (line icons, one per category — doubles as the “chain” wayfinding motif) ---------------- */
+const ICONS = {
+  ring: `<circle cx="50" cy="55" r="26" stroke="currentColor" stroke-width="4"/><path d="M38 30 L50 10 L62 30" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>`,
+  earring: `<circle cx="50" cy="22" r="8" stroke="currentColor" stroke-width="4"/><path d="M50 30 v14" stroke="currentColor" stroke-width="4"/><path d="M35 44 a15 15 0 1 0 30 0" stroke="currentColor" stroke-width="4"/>`,
+  necklace: `<path d="M15 20 q35 55 70 0" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="50" cy="72" r="9" stroke="currentColor" stroke-width="4"/>`,
+  chain: `<rect x="30" y="14" width="18" height="26" rx="9" stroke="currentColor" stroke-width="4"/><rect x="30" y="60" width="18" height="26" rx="9" stroke="currentColor" stroke-width="4"/><rect x="12" y="37" width="18" height="26" rx="9" transform="rotate(90 21 50)" stroke="currentColor" stroke-width="4"/>`,
+  pendant: `<path d="M15 20 q35 45 70 0" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 55 l14 20 l-14 12 l-14-12 Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>`,
+  bracelet: `<ellipse cx="50" cy="50" rx="34" ry="20" stroke="currentColor" stroke-width="4"/>`,
+  bangle: `<circle cx="50" cy="50" r="30" stroke="currentColor" stroke-width="6"/>`,
+  mangalsutra: `<path d="M15 18 q35 30 70 0" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="42" cy="52" r="7" stroke="currentColor" stroke-width="4"/><circle cx="58" cy="52" r="7" stroke="currentColor" stroke-width="4"/><path d="M50 59 v18" stroke="currentColor" stroke-width="4"/>`,
+  nosepin: `<circle cx="50" cy="50" r="6" fill="currentColor"/><path d="M56 50 q14 -4 10 -20" stroke="currentColor" stroke-width="4" fill="none"/>`,
+  anklet: `<ellipse cx="50" cy="45" rx="32" ry="16" stroke="currentColor" stroke-width="4"/><circle cx="50" cy="61" r="4" fill="currentColor"/><circle cx="34" cy="53" r="4" fill="currentColor"/><circle cx="66" cy="53" r="4" fill="currentColor"/>`,
+  mens: `<rect x="24" y="30" width="52" height="14" stroke="currentColor" stroke-width="4"/><rect x="24" y="56" width="52" height="14" stroke="currentColor" stroke-width="4"/>`,
+  kids: `<path d="M50 30 c-14 -16 -38 2 -14 26 L50 72 L64 56 c24 -24 0 -42 -14 -26 Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>`,
+  gift: `<rect x="20" y="42" width="60" height="38" stroke="currentColor" stroke-width="4"/><path d="M20 42 h60 M50 42 v38" stroke="currentColor" stroke-width="4"/><path d="M50 42 c-18 0 -18 -22 0 -22 c18 0 18 22 0 22 Z" stroke="currentColor" stroke-width="4"/>`
+};
+const icon = (key) => `<svg viewBox="0 0 100 100" fill="none">${ICONS[key]}</svg>`;
+
+/* ---------------- category data ---------------- */
+const CATS = [
+{id:'rings', name:'Rings', icon:'ring', accent:'var(--gold)', accentSoft:'var(--gold-soft)',
+  eyebrow:'Fine Jewellery / Rings', title:'Rings, for every hand and every reason',
+  sub:"From everyday bands to the ring you'll tell a story about — shop rings in gold, diamond and platinum, sized and certified.",
+  stats:[['1,240+','Designs'],['15','Sizes stocked'],['BIS','Hallmarked']],
+  filters:[['Metal',['Gold','Platinum','Silver','Rose Gold']],['Stone',['Diamond','Gemstone','Solitaire','Plain']],['Occasion',['Engagement','Daily wear','Wedding','Cocktail']],['Price',['Under ₹15k','₹15k–50k','₹50k+']]],
+  gridLabel:'The Rings edit — 248 designs',
+  related:[['bracelet','Bracelets','Layer a matching band on the wrist for a coordinated set'],['earring','Earrings','Complete a bridal or party look with drops in the same metal'],['gift','Gift Collection','Pre-boxed ring gifting sets for proposals and anniversaries']],
+  seoTitle:'Rings that mark the moment',
+  seoBody:["A ring is rarely just an accessory — it's the one piece of jewellery people ask about. Our ring collection spans everyday gold bands you can wear to work, diamond solitaires for engagements, and stackable rings for building a look one finger at a time. Every ring is available across standard Indian sizes with free resizing, so what you see online is what fits.",
+  "Shopping for rings online works best when you know two things: your size and your metal preference. If you're unsure of size, order our free ring sizer or visit a partner store for a fitting — we'll hold your resizing free for 30 days after delivery."],
+  tips:['Pair a slim band with a statement cocktail ring on the opposite hand rather than stacking both on one finger.','Rose gold and diamond reads warmer for daytime; platinum and diamond reads sharper for evening.','For daily wear, choose 14K over 22K gold — it resists scratching better.'],
+  faq:[['Do you offer free resizing?','Yes, one free resize within 30 days of delivery on all ring purchases.'],['How do I find my ring size at home?','Wrap a strip of paper around your finger, mark the overlap, and match it to our printable size chart.']]
+},
+{id:'earrings', name:'Earrings', icon:'earring', accent:'var(--rose)', accentSoft:'#E7C3BD',
+  eyebrow:'Fine Jewellery / Earrings', title:'Earrings that frame every face, every day',
+  sub:'Studs for the office, hoops for the weekend, chandeliers for the wedding season — one drawer, every occasion covered.',
+  stats:[['980+','Designs'],['4','Back types'],['Hypoallergenic','Options']],
+  filters:[['Metal',['Gold','Silver','Rose Gold']],['Style',['Studs','Hoops','Drops','Jhumkas','Chandeliers']],['Occasion',['Daily wear','Office','Party','Bridal']],['Price',['Under ₹8k','₹8k–25k','₹25k+']]],
+  gridLabel:'The Earrings edit — 316 designs',
+  related:[['necklace','Necklaces','Match a drop earring to a pendant necklace for instant sets'],['nosepin','Nose Pins','Complete a bridal or festive look with a coordinating nath'],['gift','Gift Collection','Boxed earring sets ready for birthdays and anniversaries']],
+  seoTitle:'Earrings for every ear, every occasion',
+  seoBody:['Earrings do more heavy lifting than any other jewellery category — they frame the face and show in every photo. Our range runs from lightweight daily studs you forget you\'re wearing to jhumkas and chandeliers built for wedding season. Filter by back type if you have sensitive ears, or by style if you already know your silhouette.',
+  'A good starting point: one pair of gold studs for daily wear, one pair of hoops for weekends, and one statement pair for occasions. Everything else is a bonus.'],
+  tips:['Match earring weight to hairstyle — heavier jhumkas suit updos, studs suit hair worn down.','Hoops under 25mm read as daily wear; anything above reads as statement.','For sensitive ears, choose gold-plated or surgical steel posts over base metal.'],
+  faq:[['Are these earrings safe for sensitive ears?','Yes, our studs use gold or surgical-steel posts and are marked hypoallergenic where applicable.'],['Can I get earrings without a piercing?','Yes, filter by "Clip-on" and "Screw-back" under Style for non-pierced options.']]
+},
+{id:'necklaces', name:'Necklaces', icon:'necklace', accent:'var(--green)', accentSoft:'#7FA88F',
+  eyebrow:'Fine Jewellery / Necklaces', title:'Necklaces built to be the centrepiece',
+  sub:'Chokers, layered chains and bridal sets — necklaces that anchor an outfit instead of following it.',
+  stats:[['540+','Designs'],['5','Length options'],['Certified','Stones']],
+  filters:[['Metal',['Gold','Diamond','Silver','Pearl']],['Length',['Choker','Princess','Matinee','Opera']],['Occasion',['Bridal','Party','Daily wear','Festive']],['Price',['Under ₹20k','₹20k–75k','₹75k+']]],
+  gridLabel:'The Necklaces edit — 190 designs',
+  related:[['earring','Earrings','Coordinate drop shape and metal for a matched bridal set'],['pendant','Pendants','Prefer a lighter look? Try a single pendant on a fine chain'],['mangalsutra','Mangalsutra','Shop the traditional necklace that carries meaning beyond style']],
+  seoTitle:'Necklaces that anchor the outfit',
+  seoBody:['A necklace sets the scale for everything else you wear — get the length right and earrings, blouse neckline and hairstyle all fall into place around it. Our necklace collection covers everything from delicate chokers for high necklines to opera-length chains that work over a plain kurta.',
+  'For bridal shopping, start with the necklace and build outward: it\'s the piece most photographed and the hardest to substitute last-minute.'],
+  tips:['Choker length suits high necklines and updos; opera length elongates the torso in simple outfits.','Match necklace metal tone to your blouse hardware, not just your other jewellery.','Layer two fine chains of different lengths instead of one heavy piece for daily wear.'],
+  faq:[['What necklace length works for a saree?','Princess or matinee length (18–24 inches) is the most versatile for saree necklines.'],['Do you sell necklace and earring sets?','Yes, filter by "Set" under Style, or check our Bridal edit for matched pairs.']]
+},
+{id:'chains', name:'Chains', icon:'chain', accent:'var(--ink)', accentSoft:'#9C9284',
+  eyebrow:'Fine Jewellery / Chains', title:'Chains that go on and never come off',
+  sub:'Unisex gold and silver chains in link styles built for daily wear — the base layer of every good jewellery collection.',
+  stats:[['210+','Link styles'],['Unisex','Sizing'],['Solid','Not hollow']],
+  filters:[['Metal',['Gold','Silver','Platinum']],['Link Style',['Rope','Box','Figaro','Cuban','Singapore']],['Length',['16"','18"','20"','24"']],['Price',['Under ₹12k','₹12k–40k','₹40k+']]],
+  gridLabel:'The Chains edit — 142 designs',
+  related:[['pendant','Pendants','Pick a chain first, then choose a pendant to hang on it'],['mens','Men\'s Jewellery','Heavier link styles built for daily, everyday wear'],['bracelet','Bracelets','Match your neck chain with a coordinating wrist chain']],
+  seoTitle:'Chains: the everyday foundation piece',
+  seoBody:['A good chain outlasts trends because it isn\'t trying to make a statement on its own — it\'s the piece you build around. We stock solid (not hollow) gold and silver chains in link styles from fine rope to heavier Cuban links, sized for both layering and standalone wear.',
+  'If you\'re buying a chain to hold a pendant, check the clasp width against the pendant\'s bail before ordering — we list bail width on every pendant\'s product page.'],
+  tips:['Rope and box chains suit pendants; Cuban and figaro links are strong enough to wear alone.','Solid chains cost more but resist stretching and kinking — worth it for daily wear.','16–18" sits at the collarbone; 20"+ layers well under collared shirts.'],
+  faq:[['Is this chain solid or hollow?','Every product page lists construction (solid/hollow) and gram weight — solid is noted where applicable.'],['Will this chain fit my existing pendant?','Check the bail opening width listed on your pendant against the chain gauge listed here before ordering.']]
+},
+{id:'pendants', name:'Pendants', icon:'pendant', accent:'var(--plum)', accentSoft:'#C6A0C0',
+  eyebrow:'Fine Jewellery / Pendants', title:'A pendant is a small story you wear',
+  sub:'Initials, birthstones and symbols on fine chains — the jewellery people ask about because it means something.',
+  stats:[['300+','Designs'],['Personalised','Options'],['Free','Chain included']],
+  filters:[['Metal',['Gold','Silver','Rose Gold']],['Type',['Initial','Birthstone','Religious','Symbol']],['Stone',['Diamond','Gemstone','None']],['Price',['Under ₹6k','₹6k–20k','₹20k+']]],
+  gridLabel:'The Pendants edit — 174 designs',
+  related:[['chain','Chains','Every pendant here is sized to fit our chain range'],['necklace','Necklaces','Want more presence? Move up to a full necklace'],['kids','Kids Jewellery','Shop birthstone pendants sized for smaller necks']],
+  seoTitle:'Pendants: jewellery with a story attached',
+  seoBody:['Pendants are the category people buy for meaning as much as looks — an initial, a birthstone, a symbol that matters to them. Our pendant collection is built to pair directly with our chain range, so sizing the bail to the chain is never a guessing game.',
+  'Most pendants ship with a complimentary fine chain, but the pendant itself is also sold separately if you already own a chain you want to use.'],
+  tips:['Layer two small pendants on chains of slightly different lengths rather than one crowded chain.','Birthstone pendants make low-effort, high-meaning gifts — no sizing needed.','Keep the pendant size proportional to the chain gauge; a heavy pendant needs a sturdier link.'],
+  faq:[['Does the pendant come with a chain?','Most pendants include a complimentary fine chain; this is noted on each product page.'],['Can I get a pendant personalised with initials?','Yes, filter by "Initial" under Type — most initial pendants ship in 3–5 days.']]
+},
+{id:'bracelets', name:'Bracelets', icon:'bracelet', accent:'var(--rose)', accentSoft:'#E7C3BD',
+  eyebrow:'Fine Jewellery / Bracelets', title:'Bracelets for the hand that\'s always moving',
+  sub:'Tennis bracelets, charm chains and cuffs — wrist jewellery built to keep up with your day.',
+  stats:[['260+','Designs'],['Adjustable','Clasps'],['Stackable','By design']],
+  filters:[['Metal',['Gold','Silver','Rose Gold']],['Style',['Tennis','Chain','Cuff','Charm','Beaded']],['Occasion',['Daily wear','Party','Bridal']],['Price',['Under ₹10k','₹10k–35k','₹35k+']]],
+  gridLabel:'The Bracelets edit — 205 designs',
+  related:[['ring','Rings','Coordinate metal tones between rings and bracelets'],['bangle','Bangles','Prefer the traditional silhouette? Shop bangles instead'],['mens','Men\'s Jewellery','Bolder chain-link bracelets built for daily wear']],
+  seoTitle:'Bracelets built for a hand in motion',
+  seoBody:['Unlike a ring or earring, a bracelet has to survive typing, cooking and everything in between — so we test clasp strength as carefully as design. Our range spans delicate tennis bracelets for evening to chunky chain-link cuffs that hold up to daily wear.',
+  'If you like to stack, choose bracelets in slightly different widths and finishes rather than identical pieces — it reads intentional instead of cluttered.'],
+  tips:['Stack 2–3 thin bracelets rather than one thick one for an everyday layered look.','Cuffs suit a minimal wrist; charm bracelets suit one that already has a watch or ring.','Choose a lobster or box clasp over a hook clasp if you wear the bracelet daily.'],
+  faq:[['Are these bracelets adjustable?','Most chain and cuff styles are adjustable; check the product page for the size range.'],['Can I add charms to a chain bracelet later?','Yes, our Charm-style bracelets are designed to accept additional charms sold separately.']]
+},
+{id:'bangles', name:'Bangles', icon:'bangle', accent:'var(--green)', accentSoft:'#7FA88F',
+  eyebrow:'Fine Jewellery / Bangles', title:'Bangles that carry festive tradition forward',
+  sub:'Classic kadas, temple-work sets and everyday-thin bangles in gold and gold-plated finishes.',
+  stats:[['320+','Designs'],['12','Size options'],['Set of 2/4/6','Available']],
+  filters:[['Metal',['Gold','Gold-plated','Silver'],],['Style',['Kada','Temple','Plain','Studded']],['Occasion',['Festive','Bridal','Daily wear']],['Size',['2.2"','2.4"','2.6"','2.8"']],['Price',['Under ₹15k','₹15k–50k','₹50k+']]],
+  gridLabel:'The Bangles edit — 231 designs',
+  related:[['mangalsutra','Mangalsutra','Complete a traditional bridal set with a matching mangalsutra'],['anklet','Anklets','Continue the traditional look from wrist to ankle'],['gift','Gift Collection','Boxed bangle sets for weddings and festive gifting']],
+  seoTitle:'Bangles for festive wear and everyday tradition',
+  seoBody:['Bangles carry more cultural weight than most jewellery categories — worn in sets for weddings, festivals and daily tradition alike. Our collection ranges from plain gold kadas for daily wear to temple-work and studded sets for weddings, sold individually or in sets of 2, 4 and 6.',
+  'Because bangle sizing is less forgiving than a ring or bracelet, we recommend measuring your widest knuckle point before ordering — our size guide is linked on every product page.'],
+  tips:['Measure across your knuckles, not your wrist, for an accurate bangle size.','Mix a plain kada with one studded piece for festive wear without overdoing it.','Buy sets in even numbers (2, 4, 6) — it\'s the traditional convention and stacks more evenly.'],
+  faq:[['How do I measure my bangle size?','Measure the widest part of your hand (across the knuckles) with a soft tape and match to our size chart.'],['Do bangles come in sets?','Yes, most designs are available individually or as sets of 2, 4 or 6.']]
+},
+{id:'mangalsutra', name:'Mangalsutra', icon:'mangalsutra', accent:'var(--green)', accentSoft:'#7FA88F',
+  eyebrow:'Fine Jewellery / Mangalsutra', title:'The Mangalsutra — tradition, worn daily',
+  sub:'Black bead and gold mangalsutras in short, long and modern convertible styles, crafted to be worn every day for years.',
+  stats:[['180+','Designs'],['22K & 18K','Gold options'],['Convertible','Styles available']],
+  filters:[['Metal',['22K Gold','18K Gold','Gold with Diamond']],['Style',['Traditional','Modern/Convertible','Short','Long']],['Bead',['Black beads','Black & Gold beads']],['Price',['Under ₹25k','₹25k–75k','₹75k+']]],
+  gridLabel:'The Mangalsutra edit — 156 designs',
+  related:[['bangle','Bangles','Complete the bridal set with matching bangles'],['gift','Gift Collection','Gift-ready mangalsutra sets for weddings and anniversaries'],['pendant','Pendants','Explore modern convertible mangalsutra pendants worn as everyday necklaces']],
+  seoTitle:'Mangalsutra: a symbol worn every day',
+  seoBody:['A mangalsutra is worn daily for years, so weight, clasp strength and bead quality matter more here than in almost any other category. Our collection includes traditional long mangalsutras with black and gold beads, shorter modern styles for daily comfort, and convertible designs that let the pendant be worn separately as a necklace.',
+  'We work only in 22K and 18K gold for this category, and every black bead strand is tested for colourfastness so it won\'t fade with daily wear.'],
+  tips:['Choose a shorter length (16–18") for daily comfort under work clothes; longer styles suit festive wear.','Convertible mangalsutras let you detach the pendant for a plain-chain everyday look.','22K gold suits traditional bead-heavy designs; 18K holds diamond and gemstone work better.'],
+  faq:[['What\'s the difference between 22K and 18K for a mangalsutra?','22K is higher purity and traditional; 18K is more durable for designs with diamonds or fine stone-setting.'],['Will the black beads fade over time?','Our beads are colourfastness-tested for daily wear, but avoiding chlorine and perfume contact extends their life.']]
+},
+{id:'nosepin', name:'Nose Pins', icon:'nosepin', accent:'var(--rose)', accentSoft:'#E7C3BD',
+  eyebrow:'Fine Jewellery / Nose Pins', title:'Nose pins, from a single stone to a full nath',
+  sub:'Screw, press and L-shaped nose pins in gold and diamond, plus statement naths for bridal and festive wear.',
+  stats:[['140+','Designs'],['3','Fitting types'],['Hypoallergenic','Options']],
+  filters:[['Metal',['Gold','Diamond','Silver']],['Fitting',['Screw','Press/L-shape','Clip-on (no piercing)']],['Occasion',['Daily wear','Bridal','Festive']],['Price',['Under ₹3k','₹3k–10k','₹10k+']]],
+  gridLabel:'The Nose Pins edit — 98 designs',
+  related:[['earring','Earrings','Coordinate stone size and metal with your earrings'],['necklace','Necklaces','Complete a bridal look with a matching necklace set'],['gift','Gift Collection','Gift-boxed nose pin sets for festivals and weddings']],
+  seoTitle:'Nose pins for daily wear and bridal statements',
+  seoBody:['A nose pin is a small piece with a lot of decisions hiding in it — screw or press fitting, gold or diamond, single stone or a full nath for bridal wear. Our range covers all three fitting types, including clip-on styles for those without a piercing.',
+  'For daily wear, a small screw-fit stone in gold is the lowest-maintenance choice; for weddings, browse our nath collection for the full traditional statement piece.'],
+  tips:['Screw fittings stay in place best for daily wear; press/L-shape is easier to change often.','Match nose pin stone colour to your primary earrings for a coordinated bridal look.','No piercing? Choose a clip-on nose pin — it holds securely without a hole.'],
+  faq:[['What\'s the difference between screw and press nose pins?','Screw fittings twist to lock in place and suit daily wear; press/L-shape pins push in and are easier to swap.'],['Can I wear a nose pin without a piercing?','Yes, our clip-on styles are designed to hold securely without a piercing.']]
+},
+{id:'anklet', name:'Anklets', icon:'anklet', accent:'var(--green)', accentSoft:'#7FA88F',
+  eyebrow:'Fine Jewellery / Anklets', title:'Anklets that move the way you do',
+  sub:'Payal chains with ghungroo bells, plain silver anklets and delicate gold chains for barefoot and sandal season alike.',
+  stats:[['110+','Designs'],['Silver & Gold','Metals'],['Adjustable','Length']],
+  filters:[['Metal',['Silver','Gold','Gold-plated']],['Style',['Ghungroo/Bells','Plain Chain','Beaded']],['Occasion',['Daily wear','Festive','Bridal']],['Price',['Under ₹4k','₹4k–15k','₹15k+']]],
+  gridLabel:'The Anklets edit — 87 designs',
+  related:[['bangle','Bangles','Continue the traditional silhouette from wrist to ankle'],['nosepin','Nose Pins','Round out a festive look with a matching nose pin'],['kids','Kids Jewellery','Shop smaller ghungroo anklets sized for children']],
+  seoTitle:'Anklets for festive tradition and everyday wear',
+  seoBody:['Anklets range from plain silver chains worn daily to ghungroo (bell) styles reserved for festive and dance occasions. Silver remains the traditional metal of choice — many buyers prefer it for anklets specifically even when the rest of their jewellery is gold — but we also stock gold and gold-plated options for those who prefer to match metals.',
+  'Length matters more here than in most categories: too loose and a bell anklet won\'t sit right when walking. Our size guide covers standard and adjustable lengths.'],
+  tips:['Silver is the traditional anklet metal even for buyers who wear gold everywhere else.','Ghungroo anklets suit festive and dance occasions; plain chains suit daily wear.','Choose an adjustable clasp if you are unsure of exact ankle size.'],
+  faq:[['Why is silver more common than gold for anklets?','It\'s a long-standing preference in Indian jewellery tradition, though gold and gold-plated options are also available.'],['How do I measure my ankle for sizing?','Measure around the ankle bone with a soft tape and add half an inch for comfortable movement.']]
+},
+{id:'mens', name:'Men\'s Jewellery', icon:'mens', accent:'var(--ink)', accentSoft:'#9C9284',
+  eyebrow:'Fine Jewellery / Men\'s', title:'Jewellery built for daily wear, not display',
+  sub:'Chains, bracelets and rings in solid gold, silver and steel — sized, weighted and finished for everyday use.',
+  stats:[['190+','Designs'],['Solid','Construction'],['Scratch-resistant','Finishes']],
+  filters:[['Metal',['Gold','Silver','Steel','Platinum']],['Category',['Chains','Bracelets','Rings','Cufflinks']],['Style',['Minimal','Bold/Statement','Religious']],['Price',['Under ₹10k','₹10k–40k','₹40k+']]],
+  gridLabel:'The Men\'s edit — 174 designs',
+  related:[['chain','Chains','Browse the full chain range these pieces are drawn from'],['bracelet','Bracelets','Pair a chain with a matching bracelet for a coordinated set'],['gift','Gift Collection','Gift-ready sets for anniversaries and milestones']],
+  seoTitle:'Men\'s jewellery, made for everyday wear',
+  seoBody:['Men\'s jewellery gets worn harder and changed less often than most categories, so we build this range around solid construction and finishes that resist scratching — heavier gauge chains, wider bands, and steel and platinum options alongside gold and silver.',
+  'The collection covers minimal daily pieces — a plain chain, a thin band — through to bolder statement pieces for those who want jewellery to be noticed, not just worn.'],
+  tips:['Match metal tone to your watch and belt buckle for a coordinated everyday look.','Choose steel or platinum over gold-plated for pieces worn daily and exposed to sweat or water.','A single chain or bracelet reads more intentional than stacking several at once.'],
+  faq:[['Will gold jewellery tarnish with daily wear or gym use?','Solid gold won\'t tarnish, but we recommend removing jewellery before swimming or heavy sweating to preserve finish.'],['Do you offer engraving on men\'s bands or bracelets?','Yes, select styles offer engraving — look for the "Personalise" option on the product page.']]
+},
+{id:'kids', name:'Kids Jewellery', icon:'kids', accent:'var(--rose)', accentSoft:'#E7C3BD',
+  eyebrow:'Fine Jewellery / Kids', title:'Jewellery made for small hands and safe wear',
+  sub:'Lightweight gold and silver pieces for children, built with rounded edges, secure clasps and skin-safe finishes.',
+  stats:[['130+','Designs'],['Nickel-free','Guaranteed'],['Adjustable','Sizing']],
+  filters:[['Metal',['Gold','Silver','Gold-plated']],['Category',['Bangles','Chains','Earrings','Anklets']],['Age',['0–2 yrs','3–6 yrs','7–12 yrs']],['Price',['Under ₹5k','₹5k–15k','₹15k+']]],
+  gridLabel:'The Kids edit — 112 designs',
+  related:[['bangle','Bangles','Shop adult bangles for coordinated mother-daughter sets'],['pendant','Pendants','Birthstone pendants sized for a child\'s neck'],['gift','Gift Collection','Boxed sets for birthdays, naming ceremonies and Rakhi']],
+  seoTitle:'Kids\' jewellery: designed around safety first',
+  seoBody:['Jewellery for children has different requirements than jewellery for adults — rounded edges instead of sharp settings, secure clasps that resist tugging, and metals tested for nickel content. Our kids\' range is organised by age group so sizing is straightforward, from 0–2 year bangles with a screw-open mechanism to earrings for older children.',
+  'Every piece in this collection is nickel-free and finished without sharp prongs or small detachable parts, in line with safety standards for children\'s jewellery.'],
+  tips:['Choose screw-open bangles for infants and toddlers rather than slip-on styles.','Nickel-free gold or silver reduces the chance of skin irritation for sensitive skin.','Size up slightly for growing children and choose adjustable chains where possible.'],
+  faq:[['Is this jewellery safe for sensitive or young skin?','Yes, our kids\' range is nickel-free and finished without sharp edges or small detachable parts.'],['How do I choose the right size for my child?','Filter by age group, then check the specific measurements listed on each product page.']]
+},
+{id:'gift', name:'Gift Collection', icon:'gift', accent:'var(--plum)', accentSoft:'#C6A0C0',
+  eyebrow:'Fine Jewellery / Gifting', title:'Jewellery, already gift-shaped',
+  sub:'Pre-curated sets and boxed pieces for anniversaries, weddings, birthdays and festivals — no wrapping required.',
+  stats:[['220+','Curated sets'],['Free','Gift box'],['Same-day','Gift message']],
+  filters:[['Occasion',['Anniversary','Wedding','Birthday','Rakhi','Diwali']],['Recipient',['For Her','For Him','For Kids','For Couples']],['Budget',['Under ₹5k','₹5k–20k','₹20k+']],['Category',['Rings','Necklaces','Bracelets','Sets']],],
+  gridLabel:'The Gift edit — 220 curated picks',
+  related:[['ring','Rings','Shop engagement and anniversary rings individually'],['mangalsutra','Mangalsutra','Explore wedding gifting sets with matching bangles'],['kids','Kids Jewellery','Find gift sets for naming ceremonies and children\'s birthdays']],
+  seoTitle:'Gifting made simple: jewellery, already chosen',
+  seoBody:['Buying jewellery as a gift comes with its own problem — you\'re choosing for someone else\'s taste, not your own. Our Gift Collection solves that by curating pieces around occasions and recipients rather than jewellery type: anniversary sets, birthday-ready pendants, Rakhi bracelets and wedding gifting sets, each pre-matched and boxed.',
+  'Every order in this collection ships in a branded gift box with a complimentary handwritten message card, so what arrives is ready to hand over, not just ready to wear.'],
+  tips:['Unsure of size? Choose adjustable pieces (bangles, chains, bracelets) over fixed-size rings for a first gift.','Pair a small piece with a handwritten note for anniversaries — presentation matters as much as the item.','Check our "Under ₹5k" filter for thoughtful gifts that don\'t require knowing exact sizing.'],
+  faq:[['Does this collection include gift wrapping?','Yes, every order in the Gift Collection ships in a complimentary branded box with an optional message card.'],['What if the recipient wants to exchange their gift?','Gift Collection orders include a gift receipt with no price shown, valid for a 30-day exchange.']]
+}
+];
+
+/* ---------------- render ---------------- */
+const switcherEl = document.getElementById('switcher');
+CATS.forEach(c=>{
+  const b = document.createElement('button');
+  b.className='chip';
+  b.dataset.id=c.id;
+  b.innerHTML = icon(c.icon) + `<span>${c.name}</span>`;
+  b.onclick = ()=>render(c.id);
+  switcherEl.appendChild(b);
+});
+
+function productCards(cat){
+  const adjectives = ['Classic','Modern','Signature','Heritage','Everyday','Statement','Delicate','Bold'];
+  let html='';
+  for(let i=0;i<8;i++){
+    const price = 4000 + (i*3300) + (cat.id.length*97);
+    html += `<div class="card">
+      <div class="card-img"><span class="card-tag">${cat.name}</span>${icon(cat.icon)}</div>
+      <div class="card-body">
+        <div class="name">${adjectives[i%adjectives.length]} ${cat.name.replace(/s$/,'').replace('Jewellery','Piece').replace('Collection','Set')} ${i+1}</div>
+        <div class="sku">SKU-AU${1000+i*7}</div>
+        <div class="price">₹${price.toLocaleString('en-IN')} <s>₹${(price*1.18|0).toLocaleString('en-IN')}</s></div>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+
+function render(id){
+  const cat = CATS.find(c=>c.id===id);
+  document.documentElement.style.setProperty('--accent', cat.accent);
+  document.documentElement.style.setProperty('--accent-soft', cat.accentSoft);
+
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active', c.dataset.id===id));
+  document.getElementById('bc-cat').textContent = cat.name;
+  document.getElementById('hero-icon').innerHTML = ICONS[cat.icon];
+  document.getElementById('div-icon').innerHTML = ICONS[cat.icon];
+  document.getElementById('hero-eyebrow').textContent = cat.eyebrow;
+  document.getElementById('hero-title').textContent = cat.title;
+  document.getElementById('hero-sub').textContent = cat.sub;
+  document.getElementById('hero-stats').innerHTML = cat.stats.map(s=>`<div class="hero-stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+
+  document.getElementById('filter-rail').innerHTML = cat.filters.map(([label,opts])=>`
+    <div class="filter-group"><h5>${label}</h5><div class="filter-opts">${opts.map((o,i)=>`<div class="filter-pill ${i===0?'on':''}">${o}</div>`).join('')}</div></div>
+  `).join('');
+
+  document.getElementById('grid-title').textContent = cat.gridLabel;
+  document.getElementById('grid').innerHTML = productCards(cat);
+
+  document.getElementById('related-row').innerHTML = cat.related.map(([ic,name,why])=>`
+    <div class="related-card">${icon(ic)}<div class="rname">${name}</div><div class="rwhy">${why}</div></div>
+  `).join('');
+
+  document.getElementById('seo-h2').textContent = cat.seoTitle;
+  document.getElementById('seo-body').innerHTML = cat.seoBody.map(p=>`<p>${p}</p>`).join('');
+  document.getElementById('seo-tips').innerHTML = cat.tips.map(t=>`<li>${t}</li>`).join('');
+  document.getElementById('seo-faq').innerHTML =
+    `<div class="faq-title" style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(33,27,21,0.5);margin-bottom:14px;">Frequently asked</div>` +
+    cat.faq.map(([q,a])=>`<div class="faq"><div class="q">${q}</div><div class="a">${a}</div></div>`).join('') +
+    `<div class="pull">"${cat.title}"</div>`;
+}
+
+render('rings');
+</script>
+</body>
+</html>
